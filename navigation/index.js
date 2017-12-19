@@ -2,6 +2,7 @@ import {StackNavigator} from 'react-navigation'
 import DeckTabs from './HomeNav'
 import DeckDetails from '../screens/DeckDetails'
 import NewCard from '../screens/NewCard'
+import Quiz from '../screens/Quiz'
 import { light, white } from '../helpers/colors';
 
 const Nav = StackNavigator({
@@ -26,7 +27,17 @@ const Nav = StackNavigator({
             backgroundColor: light
           }
         }
-    }
+    },
+    Quiz: {
+      screen: Quiz,
+      navigationOptions: {
+        headerTintColor: white,
+        title: 'Quiz',
+        headerStyle: {
+          backgroundColor: light
+        }
+      }
+  }
 })
 
 export default Nav
