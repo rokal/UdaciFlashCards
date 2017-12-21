@@ -31,7 +31,7 @@ class NewDeck extends Component {
                     value={value}
                     placeholder='Deck title'
                 />
-                <TouchableOpacity style={{backgroundColor: light,  marginTop: 15, borderRadius: 10 }} disabled={disabled} onPress={this.handleDeckCreation}>
+                <TouchableOpacity style={{backgroundColor: light,  marginTop: 15 }} disabled={disabled} onPress={this.handleDeckCreation}>
                     <Text style={styles.buttonText}>Submit</Text>
                 </TouchableOpacity>
             </KeyboardAvoidingView>

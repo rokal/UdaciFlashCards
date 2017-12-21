@@ -46,9 +46,8 @@ export async function getDeck(id) {
     return decks[id]
 }
 
-export async function saveDeckTitle (title) {
-    const newDeck = {title, questions: []}
-    await AsyncStorage.mergeItem(DECK_STORAGE_KEY, JSON.stringify({[title]: newDeck}))
+export async function saveDeck (deck) {
+    await AsyncStorage.mergeItem(DECK_STORAGE_KEY, JSON.stringify({[deck.title]: deck}))
     return newDeck
 }
 

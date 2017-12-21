@@ -1,43 +1,65 @@
 import React from 'react'
 import {View, Text, TouchableOpacity, StyleSheet} from 'react-native'
+import {get} from 'lodash'
 import { connect } from 'react-redux'
-import { white } from '../helpers/colors';
+import { white, light } from '../helpers/colors'
+import CustomButton from './CustomButton'
 
 class Quiz extends React.Component{
     state = {
-        currentQuestion: 1
+        currentQuestionIndex: 0,
+        showResponse: false,
+        responses: {}
     }
-    render () {
+
+    toggleQuestionView = () => {
+        this.setState({showResponse: !this.state.showResponse})
+    }
+
+    saveAnswer = (response) => {
+        const {currentQuestionIndex, showResponse, responses} = this.state
         const {deck} = this.props
-        return (
-            <View>
-                <View style={{flexGrow: 1}}>
-                    <Text>1/2</Text>
+        const question  = deck.questions[currentQuestionIndex]
+        const newResponses = {...responses}
+        newResponses[question.title] = response
+        this.setState({responses: newResponses, currentQuestionIndex: currentQuestionIndex+1, showResponse: false})
+    }
+
+    render () {
+        const {showResponse, currentQuestionIndex} = this.state
+        const {deck} = this.props
+        const responseText = showResponse ? 'Question' : 'Response'
+        const currentQuestion = deck['questions'][currentQuestionIndex] || {}
+        const description = showResponse ? currentQuestion.answer : currentQuestion.question
+        const isQuizFinished = currentQuestionIndex === deck.questions.length
+        return !isQuizFinished ? (
+                <View style={{padding: 10}}>
+                    <Text>{`${currentQuestionIndex+1}/${deck.questions.length}`}</Text>
+                    <View style={[styles.center, {height: '95%'}]}>
+                        <View style={[{marginBottom: 30}, styles.center]}>
+                            <Text style={[styles.text]}>{description}</Text>
+                            <TouchableOpacity onPress={this.toggleQuestionView}>
+                                <Text style={styles.toggleBtn}>{responseText}</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <View style={styles.center}>
+                            <CustomButton backgroundColor='green' textColor={white} label='Correct' onPress={() => this.saveAnswer(true)} />
+                            <CustomButton backgroundColor='red' textColor={white} label='Incorrect' onPress={() => this.saveAnswer(false)} />
+                        </View>
+                    </View>
                 </View>
-                <View style={[styles.center]}>
-                    <View style={[{marginBottom: 30}, styles.center]}>
-                        <Text style={[styles.text]}>React native is a very nice framework.</Text>
-                        <TouchableOpacity>
-                            <Text style={styles.toggleBtn}>Question / Response</Text>
-                        </TouchableOpacity>
-                    </View>
-                    <View style={styles.center}>
-                        <TouchableOpacity style={[styles.center, {backgroundColor: 'red', width: 150, marginBottom: 10, borderRadius: 10}]}>
-                            <Text style={styles.btnText}>Correct</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={[styles.center, {backgroundColor: 'green', width: 150, marginBottom: 10, borderRadius: 10}]}>
-                            <Text style={styles.btnText}>Incorrect</Text>
-                        </TouchableOpacity>
-                    </View>
-                 </View>
-            </View>
-        )
+            ) : (
+                <View style={[{padding: 10, height: '95%'}, styles.center]}>
+                    <Text style={{fontSize: 20}}>The quiz is done</Text>
+                    <CustomButton background={light} label='Show my score' onPress={() => alert('Quiz done')} />
+                </View>
+            )
     }
 }
 
 export default connect((state, props) => {
     const {deckId} = props.navigation.state.params
-    deck = state.decks.byId[deckId]
+    const deck = get(state, `decks.byId.${deckId}`, {})
     return {deck}}
 )(Quiz)
 
@@ -57,14 +79,10 @@ const styles = StyleSheet.create({
         fontSize: 30,
         textAlign: 'center'
     },
-    btnText: {
-        color: white,
+    toggleBtn: {
         fontSize: 30,
-        paddingTop:10,
-        paddingBottom:10,
-        paddingLeft: 15,
-        paddingRight: 15,
-        borderRadius: 10
+        color: 'red',
+        padding: 10
     },
     title: {
         marginBottom: 20
