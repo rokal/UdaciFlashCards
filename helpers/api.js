@@ -1,34 +1,33 @@
 import {AsyncStorage} from 'react-native'
+import { NOTIFICATIONS_KEY } from './notification';
 
 const DECK_STORAGE_KEY = 'UdaciDecks'
 
-const initialData = {
-    "React": {
-        title: "React",
-        questions: [
-            {
-                question: "Where does react came from",
-                answers: [
-                    {
-                        body: "Facebook",
-                        isRight: true
-                    },
-                    {
-                        body: "Amazone",
-                        isRight: false
-                    },
-                    {
-                        body: "Google",
-                        isRight: false
-                    },
-                    {
-                        body: "Twitter",
-                        isRight: false
-                    }
-                ]
-            }
-        ]
-    }
+export const initialData = {
+    title: "React",
+    questions: [
+        {
+            title: "Where does react came from",
+            answers: [
+                {
+                    body: "Facebook",
+                    isTruthy: true
+                },
+                {
+                    body: "Amazone",
+                    isTruthy: false
+                },
+                {
+                    body: "Google",
+                    isTruthy: false
+                },
+                {
+                    body: "Twitter",
+                    isTruthy: false
+                }
+            ]
+        }
+    ]
 }
 
 export async function loadInitialData () {
@@ -46,10 +45,9 @@ export async function getDeck(id) {
     return decks[id]
 }
 
-export async function saveDeckTitle (title) {
-    const newDeck = {title, questions: []}
-    await AsyncStorage.mergeItem(DECK_STORAGE_KEY, JSON.stringify({[title]: newDeck}))
-    return newDeck
+export async function saveDeck (deck) {
+    await AsyncStorage.mergeItem(DECK_STORAGE_KEY, JSON.stringify({[deck.title]: deck}))
+    return deck
 }
 
 export async function addCardToDeck (title, card) {
@@ -60,6 +58,15 @@ export async function addCardToDeck (title, card) {
     return deck
 }
 
+export async function removeCardFromDeck (title, cardTitle) {
+    const decks = await getDecks()
+    const deck = decks[title]
+    const newQuestions = deck.questions.filter(question => question.title !== cardTitle)
+    deck.questions = newQuestions
+    AsyncStorage.mergeItem(DECK_STORAGE_KEY, JSON.stringify({...decks, [title]: deck}))
+    return deck
+}
+
 export async function resetDb () {
-    return AsyncStorage.removeItem(DECK_STORAGE_KEY)
+    return AsyncStorage.removeItem(DECK_STORAGE_KEY).then(AsyncStorage.removeItem(NOTIFICATIONS_KEY))
 } 

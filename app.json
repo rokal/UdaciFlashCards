@@ -1,5 +1,20 @@
 {
   "expo": {
-    "sdkVersion": "23.0.0"
+    "name": "FlashCards",
+    "slug": "flash-cards",
+    "orientation": "portrait",
+    "description": "The best quiz  app in the world.",
+    "sdkVersion": "23.0.0",
+    "version": "1.0",
+    "icon": "test-quiz.png",
+    "notification": {
+      "icon": "test-quiz.png"
+    },
+    "ios": {
+     "bundleIdentifier": "org.hakilikura.exp"
+    },
+    "android": {
+     "package": "org.hakilikura.exp"
+    }
   }
 }

@@ -1,10 +1,11 @@
 import React from 'react'
 import {View, Text, TouchableOpacity, StyleSheet} from 'react-native'
-import {get, map} from 'lodash'
+import {get, map, isNil} from 'lodash'
 import {NavigationActions} from 'react-navigation'
 import { connect } from 'react-redux'
 import { white, light, primary } from '../helpers/colors'
 import {computeQuizResult} from '../helpers/quizEngine'
+import {clearLocalNotification, setLocalNotification} from '../helpers/notification'
 import CustomButton from './CustomButton'
 import Answers from './Answers'
 import UserAnswers from './UserAnswers'
@@ -47,6 +48,7 @@ class Quiz extends React.Component{
         const {responses} = this.state
         const score = computeQuizResult(responses)
         this.setState({quizResult: score})
+        clearLocalNotification().then(setLocalNotification)
     }
 
     render () {
@@ -54,6 +56,22 @@ class Quiz extends React.Component{
         const {deck, navigation} = this.props
         const currentQuestion = deck['questions'][currentQuestionIndex] || {}
         const isQuizFinished = currentQuestionIndex === deck.questions.length
+        if (deck.questions.length === 0) {
+            return (
+                <View style={{padding: 10, alignItems: 'center', justifyContent: 'center'}}>
+                    <Text style={{fontSize: 25, opacity: 0.5, textAlign: 'center'}}>You have no questions in your deck</Text>
+                    <CustomButton 
+                        backgroundColor={white} 
+                        borderColor={light} 
+                        label='Click here to add some'
+                        textColor={primary}
+                        onPress={() => {
+                            navigation.goBack()
+                            navigation.navigate('NewQuestion')
+                        }} />
+                </View>
+            )
+        }
         return !isQuizFinished ? (
                 <View style={{padding: 10}}>
                     <Text>{`${currentQuestionIndex+1}/${deck.questions.length}`}</Text>
@@ -80,7 +98,7 @@ class Quiz extends React.Component{
                 <View style={[{padding: 10, height: '95%'}, styles.center]}>
                     <Text style={{fontSize: 20, marginBottom: 20, opacity: 0.7}}>The quiz is done</Text>
                     {
-                        quizResult ? (
+                        !isNil(quizResult) ? (
                             <View style={ styles.center }>
                                 <Text style={{fontSize:25, opacity: 0.5}}>{`Your score is `}</Text>
                                 <Text style={{fontSize:25, color: light}}>{`${quizResult}%`}</Text>

@@ -1,4 +1,4 @@
-import {saveDeck as saveDeckInDb, getDecks, addCardToDeck, removeCardFromDeck} from '../../helpers/api2'
+import {saveDeck as saveDeckInDb, getDecks, addCardToDeck, removeCardFromDeck} from '../../helpers/api'
 
 export const SAVE_DECK = 'SAVE_DECK'
 export const SAVE_DECKS = 'SAVE_DECKS'
