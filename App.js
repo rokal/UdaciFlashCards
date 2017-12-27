@@ -6,10 +6,13 @@ import {Constants} from 'expo'
 
 import {configureStore} from './config/store'
 import { dark } from './helpers/colors'
-import {resetDb} from './helpers/api'
+import {initialData, resetDb} from './helpers/api'
 import Nav from './navigation'
+import {createDeck} from './modules/decks/actions'
+import {setLocalNotification} from './helpers/notification'
 
 const store = configureStore()
+store.dispatch(createDeck(initialData))
 // resetDb()
 
 function UdaciDecksStatusBar ({backgroundColor, ...props}) {
@@ -21,6 +24,11 @@ function UdaciDecksStatusBar ({backgroundColor, ...props}) {
 }
 
 export default class App extends React.Component {
+
+  componentDidMount () {
+    setLocalNotification()
+  }
+
   render() {
     return (
       <Provider store={store}>

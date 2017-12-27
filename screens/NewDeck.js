@@ -15,7 +15,7 @@ class NewDeck extends Component {
     handleDeckCreation = () => {
         const {value} = this.state
         const {dispatch, navigation} = this.props
-        dispatch(createDeck(value))
+        dispatch(createDeck({title: value, questions: []}))
         this.setState({value: ''})
         navigation.navigate('Decks')
     }
