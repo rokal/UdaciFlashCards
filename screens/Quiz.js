@@ -1,22 +1,31 @@
 import React from 'react'
 import {View, Text, TouchableOpacity, StyleSheet} from 'react-native'
-import {get} from 'lodash'
+import {get, map} from 'lodash'
+import {NavigationActions} from 'react-navigation'
 import { connect } from 'react-redux'
-import { white, light } from '../helpers/colors'
+import { white, light, primary } from '../helpers/colors'
+import {computeQuizResult} from '../helpers/quizEngine'
 import CustomButton from './CustomButton'
+import Answers from './Answers'
+import UserAnswers from './UserAnswers'
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 class Quiz extends React.Component{
-    state = {
-        currentQuestionIndex: 0,
-        showResponse: false,
-        responses: {}
+    constructor (props) {
+        super(props)
+        this.state = {
+            currentQuestionIndex: 0,
+            showResponse: false,
+            responses: props.initialResponses,
+            quizResult: null
+        }
     }
 
     toggleQuestionView = () => {
         this.setState({showResponse: !this.state.showResponse})
     }
 
-    saveAnswer = (response) => {
+    saveAnswers = (response) => {
         const {currentQuestionIndex, showResponse, responses} = this.state
         const {deck} = this.props
         const question  = deck.questions[currentQuestionIndex]
@@ -25,33 +34,72 @@ class Quiz extends React.Component{
         this.setState({responses: newResponses, currentQuestionIndex: currentQuestionIndex+1, showResponse: false})
     }
 
-    render () {
-        const {showResponse, currentQuestionIndex} = this.state
+    saveUserAnswer = (response) => {
+        const {currentQuestionIndex, showResponse, responses} = this.state
         const {deck} = this.props
-        const responseText = showResponse ? 'Question' : 'Response'
+        const question  = deck.questions[currentQuestionIndex]
+        const newResponses = {...responses}
+        newResponses[question.title] = response
+        this.setState({responses: newResponses})
+    }
+
+    computeQuizResult = () => {
+        const {responses} = this.state
+        const score = computeQuizResult(responses)
+        this.setState({quizResult: score})
+    }
+
+    render () {
+        const {showResponse, currentQuestionIndex, responses, quizResult} = this.state
+        const {deck, navigation} = this.props
         const currentQuestion = deck['questions'][currentQuestionIndex] || {}
-        const description = showResponse ? currentQuestion.answer : currentQuestion.question
         const isQuizFinished = currentQuestionIndex === deck.questions.length
         return !isQuizFinished ? (
                 <View style={{padding: 10}}>
                     <Text>{`${currentQuestionIndex+1}/${deck.questions.length}`}</Text>
                     <View style={[styles.center, {height: '95%'}]}>
                         <View style={[{marginBottom: 30}, styles.center]}>
-                            <Text style={[styles.text]}>{description}</Text>
+                            {!showResponse ? (
+                                <Text style={[styles.text]}>{currentQuestion.title}</Text>
+                            ) : (
+                                <Answers answers={currentQuestion.answers} />
+                            )}
                             <TouchableOpacity onPress={this.toggleQuestionView}>
-                                <Text style={styles.toggleBtn}>{responseText}</Text>
+                                {
+                                    showResponse ? <FontAwesome name='eye-slash' size={30} /> : <FontAwesome name='eye' size={30}/>
+                                }
                             </TouchableOpacity>
                         </View>
+                        <UserAnswers answers={responses[currentQuestion.title]} onResponseInput={this.saveUserAnswer} />
                         <View style={styles.center}>
-                            <CustomButton backgroundColor='green' textColor={white} label='Correct' onPress={() => this.saveAnswer(true)} />
-                            <CustomButton backgroundColor='red' textColor={white} label='Incorrect' onPress={() => this.saveAnswer(false)} />
+                            <CustomButton borderColor={primary} backgroundColor={white} textColor={primary} label='Next' onPress={() => this.setState({currentQuestionIndex: currentQuestionIndex+1, showResponse: false})} />
                         </View>
                     </View>
                 </View>
             ) : (
                 <View style={[{padding: 10, height: '95%'}, styles.center]}>
-                    <Text style={{fontSize: 20}}>The quiz is done</Text>
-                    <CustomButton background={light} label='Show my score' onPress={() => alert('Quiz done')} />
+                    <Text style={{fontSize: 20, marginBottom: 20, opacity: 0.7}}>The quiz is done</Text>
+                    {
+                        quizResult ? (
+                            <View style={ styles.center }>
+                                <Text style={{fontSize:25, opacity: 0.5}}>{`Your score is `}</Text>
+                                <Text style={{fontSize:25, color: light}}>{`${quizResult}%`}</Text>
+                                <CustomButton background={light} label='Restart' onPress={() => navigation.navigate('Quiz', {deckId: deck.title})} />
+                                <CustomButton borderColor={primary} backgroundColor={white} textColor={primary} label='Go to home screen' onPress={() => {
+                                    navigation.dispatch(
+                                        NavigationActions.reset({
+                                         index: 0,
+                                         actions: [
+                                           NavigationActions.navigate({ routeName: 'Home'})
+                                         ]
+                                       }))
+                                }} />
+                            </View>
+                        ) : (
+                            <CustomButton background={light} label='Show my score' onPress={this.computeQuizResult} />
+                        )
+                    }
+                    
                 </View>
             )
     }
@@ -60,7 +108,11 @@ class Quiz extends React.Component{
 export default connect((state, props) => {
     const {deckId} = props.navigation.state.params
     const deck = get(state, `decks.byId.${deckId}`, {})
-    return {deck}}
+    const initialResponses = {}
+    for(let question of deck.questions) {
+        initialResponses[question.title] = map(question.answers, ans => ({...ans, userResponse: false}))
+    }
+    return {deck, initialResponses}}
 )(Quiz)
 
 const styles = StyleSheet.create({

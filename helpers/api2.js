@@ -7,23 +7,23 @@ const initialData = {
         title: "React",
         questions: [
             {
-                question: "Where does react came from",
+                title: "Where does react came from",
                 answers: [
                     {
                         body: "Facebook",
-                        isRight: true
+                        isTruthy: true
                     },
                     {
                         body: "Amazone",
-                        isRight: false
+                        isTruthy: false
                     },
                     {
                         body: "Google",
-                        isRight: false
+                        isTruthy: false
                     },
                     {
                         body: "Twitter",
-                        isRight: false
+                        isTruthy: false
                     }
                 ]
             }
@@ -48,13 +48,22 @@ export async function getDeck(id) {
 
 export async function saveDeck (deck) {
     await AsyncStorage.mergeItem(DECK_STORAGE_KEY, JSON.stringify({[deck.title]: deck}))
-    return newDeck
+    return deck
 }
 
 export async function addCardToDeck (title, card) {
     const decks = await getDecks()
     const deck = decks[title]
     deck.questions.push(card)
+    AsyncStorage.mergeItem(DECK_STORAGE_KEY, JSON.stringify({...decks, [title]: deck}))
+    return deck
+}
+
+export async function removeCardFromDeck (title, cardTitle) {
+    const decks = await getDecks()
+    const deck = decks[title]
+    const newQuestions = deck.questions.filter(question => question.title !== cardTitle)
+    deck.questions = newQuestions
     AsyncStorage.mergeItem(DECK_STORAGE_KEY, JSON.stringify({...decks, [title]: deck}))
     return deck
 }

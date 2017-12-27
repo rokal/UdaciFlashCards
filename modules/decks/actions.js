@@ -1,10 +1,10 @@
-import {saveDeckTitle, getDecks, addCardToDeck} from '../../helpers/api'
+import {saveDeck as saveDeckInDb, getDecks, addCardToDeck, removeCardFromDeck} from '../../helpers/api2'
 
 export const SAVE_DECK = 'SAVE_DECK'
 export const SAVE_DECKS = 'SAVE_DECKS'
 
-export const createDeck = (title) => dispatch => {
-    saveDeckTitle(title).then(newDeck => {
+export const createDeck = (deck) => dispatch => {
+    saveDeckInDb(deck).then(newDeck => {
         dispatch(saveDeck(newDeck))
     })
 }
@@ -15,9 +15,16 @@ export const fetchDecks = () => dispatch => {
     })
 }
 
-export const addCard = (deckId, question, answer) => dispatch => {
-    addCardToDeck(deckId, {question, answer}).then(deck => {
+export const addQuestion = (deckId, question) => dispatch => {
+    addCardToDeck(deckId, question).then(deck => {
         dispatch(saveDeck(deck))
+    })
+}
+
+export const deleteQuestion = (deckId, cardTitle, callback) => dispatch => {
+    removeCardFromDeck(deckId, cardTitle).then(deck => {
+        dispatch(saveDeck(deck))
+        callback()
     })
 }
 

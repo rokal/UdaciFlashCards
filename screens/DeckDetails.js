@@ -1,17 +1,51 @@
-import React, {Component} from 'react'
+import React, {Component, PureComponent} from 'react'
 import {connect} from 'react-redux'
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native'
-import { light, white } from '../helpers/colors'
+import {View, Text, StyleSheet, TouchableOpacity, Dimensions} from 'react-native'
+import {TabNavigator} from 'react-navigation'
+import {FontAwesome} from '@expo/vector-icons'
+import { light, white, primary } from '../helpers/colors'
 import CustomButton from './CustomButton'
 import Tabs from '../navigation/HomeNav'
+import Questions from './Questions'
+import NewQuestion from './NewQuestion'
+import {getTabNavOptions} from '../helpers/navConfig'
+
+const navigationOptions = getTabNavOptions()
+
+const QuestionTabs = TabNavigator({
+    Questions: {
+        screen: Questions
+    },
+    NewQuestion: {
+        screen: NewQuestion,
+        navigationOptions: {
+        tabBarLabel: 'New question'
+        }
+    }
+},navigationOptions)
+
+const StartQuizBtn = ({onPress}) => {
+    return (
+        <View>
+            <TouchableOpacity style={{backgroundColor: light,  marginRight: 5}} onPress={onPress}>
+                <View style={{flexDirection: 'row', alignItems: 'center', padding:5}}>
+                    <FontAwesome name='caret-square-o-right' color={white} />
+                    <Text style={ {color: white, padding: 2} }>start quiz</Text>
+                </View>
+            </TouchableOpacity>
+        </View>
+    )
+}
 
 class DeckDetails extends Component {
     static navigationOptions = ({navigation}) => {
         const {deckId} = navigation.state.params
         return {
-            title: deckId
+            title: deckId,
+            headerRight: <StartQuizBtn onPress={() => navigation.navigate('Quiz', {deckId})} />
         }
     }
+
     goToCardForm = () => {
         const {deck, navigation} = this.props
         navigation.navigate('NewCard', {deckId: deck.title})
@@ -23,29 +57,23 @@ class DeckDetails extends Component {
     }
 
     render () {
-        const {deck} = this.props
+        const {deck, navigation} = this.props
         return (
-            <View style={styles.container}>
-                <View style={{marginBottom: 40}}>
-                    <Text style={styles.description}>{deck.title}</Text>
-                    <Text style={styles.cards}>{`${deck.questions.length} cards`}</Text>
-                </View>
-                <View>
-                    <CustomButton backgroundColor={white} textColor={light} borderColor={light} label='Add card' onPress={this.goToCardForm} />
-                    <CustomButton backgroundColor={light} textColor={white} label='Start quiz' onPress={this.goToQuizView} />
-                </View>
+            <View style={{flex: 1}}>
+                <QuestionTabs navigation={navigation}/>
             </View>
         )
     }
 }
 
-export default connect((state, props) => {
+const DeckDetailsConnected = connect((state, props) => {
     const {deckId} = props.navigation.state.params
-    deck = state.decks.byId[deckId]
-    return {
-        deck
-    }
+    return{ deck: state.decks.byId[deckId] } 
 })(DeckDetails)
+
+DeckDetailsConnected.router = QuestionTabs.router
+
+export default DeckDetailsConnected
 
 const styles = StyleSheet.create({
     container: {

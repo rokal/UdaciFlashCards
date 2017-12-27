@@ -1,8 +1,10 @@
-import {TabNavigator} from 'react-navigation'
+import {TabNavigator, StackNavigator} from 'react-navigation'
 import Decks from '../screens/Decks'
 import NewDeck from '../screens/NewDeck'
-import { primary, white } from '../helpers/colors';
+import { primary, white } from '../helpers/colors'
+import {getTabNavOptions} from '../helpers/navConfig'
 
+const navigationOptions = getTabNavOptions('FlashCards')
 const Home = TabNavigator({
     Decks: {
         screen: Decks,
@@ -16,25 +18,6 @@ const Home = TabNavigator({
             tabBarLabel: 'New Deck'
         }
     }
-},
-{
-    navigationOptions: {
-        header: null
-    },
-    tabBarOptions: {
-        activeTintColor: white,
-        style: {
-            height: 56,
-            backgroundColor: primary,
-            shadowColor: 'rgba(0, 0, 0, 0.25)',
-            shadowOffset: {
-                width: 0,
-                height: 2
-            },
-            shadowRadius: 6,
-            shadowOpacity: 1
-        }
-    }
-})
+},navigationOptions)
 
 export default Home
