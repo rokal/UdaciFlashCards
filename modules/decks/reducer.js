@@ -1,6 +1,6 @@
 import {get} from 'lodash'
 
-import {SAVE_DECK, SAVE_DECKS} from './actions'
+import {SAVE_DECK, SAVE_DECKS, SAVE_ROUTE_KEY} from './actions'
 const initialState = {
     byId: {}
 }
@@ -15,6 +15,8 @@ export default function reducer(state=initialState, action) {
             return newState
         case SAVE_DECKS:
             return {...state, byId: action.decks}
+        case SAVE_ROUTE_KEY:
+            return {...state, routeKey: action.key}
         default:
             return state
     }

@@ -4,6 +4,7 @@ import {values} from 'lodash'
 import {View, Text, FlatList} from 'react-native'
 import {fetchDecks} from '../modules/decks/actions'
 import DeckItem from './DeckItem'
+import {getDecks} from '../modules/decks/selector'
 
 class Decks extends Component {
     componentDidMount() {
@@ -13,7 +14,7 @@ class Decks extends Component {
 
     handleDeckPressed = (deck) => {
         const {navigation} = this.props
-        navigation.navigate('DeckDetails', {deckId: deck.title})
+        navigation.navigate('DeckDetails', {deckId: deck.title, cardsCount: deck.questions.length})
     }
     render() {
         const {decks} = this.props
@@ -27,10 +28,7 @@ class Decks extends Component {
 }
 
 const mapStateToProps = (state) => {
-    const decks = values(state.decks.byId).map((deck, index) => ({...deck, key: deck.title}))
-    return {
-        decks
-    }
+    return {decks : getDecks(state)}
 }
 
 export default connect(mapStateToProps)(Decks)

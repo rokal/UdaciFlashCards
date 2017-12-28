@@ -1,7 +1,6 @@
 import {StackNavigator} from 'react-navigation'
 import DeckTabs from './HomeNav'
 import DeckDetails from '../screens/DeckDetails'
-import NewCard from '../screens/NewCard'
 import Quiz from '../screens/Quiz'
 import { light, white, primary } from '../helpers/colors'
 import QuestionDetails from '../screens/QuestionDetails'
@@ -18,16 +17,6 @@ const Nav = StackNavigator({
             backgroundColor: primary,
             elevation: 0,
             shadowOpacity: 0
-          }
-        }
-    },
-    NewCard: {
-        screen: NewCard,
-        navigationOptions: {
-          headerTintColor: white,
-          title: 'Add card',
-          headerStyle: {
-            backgroundColor: primary
           }
         }
     },

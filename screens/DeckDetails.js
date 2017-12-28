@@ -9,6 +9,8 @@ import Tabs from '../navigation/HomeNav'
 import Questions from './Questions'
 import NewQuestion from './NewQuestion'
 import {getTabNavOptions} from '../helpers/navConfig'
+import styles from '../helpers/styles'
+import {saveRouteKey} from '../modules/decks/actions'
 
 const navigationOptions = getTabNavOptions()
 
@@ -19,14 +21,15 @@ const QuestionTabs = TabNavigator({
     NewQuestion: {
         screen: NewQuestion,
         navigationOptions: {
-        tabBarLabel: 'New question'
+            tabBarLabel: 'New question'
         }
     }
 },navigationOptions)
 
-const StartQuizBtn = ({onPress}) => {
+const RightActions = ({onPress, cardsCount}) => {
     return (
-        <View>
+        <View style={[{flexDirection: 'row'}, styles.center]}>
+            <Text style={{color: white, marginRight: 3}}>{cardsCount && `${cardsCount} cards`}</Text>
             <TouchableOpacity style={{backgroundColor: light,  marginRight: 5}} onPress={onPress}>
                 <View style={{flexDirection: 'row', alignItems: 'center', padding:5}}>
                     <FontAwesome name='caret-square-o-right' color={white} />
@@ -39,25 +42,21 @@ const StartQuizBtn = ({onPress}) => {
 
 class DeckDetails extends Component {
     static navigationOptions = ({navigation}) => {
-        const {deckId} = navigation.state.params
+        const {deckId, cardsCount} = navigation.state.params
         return {
             title: deckId,
-            headerRight: <StartQuizBtn onPress={() => navigation.navigate('Quiz', {deckId})} />
+            headerRight: <RightActions cardsCount={cardsCount} onPress={() => navigation.navigate('Quiz', {deckId})} />
         }
     }
 
-    goToCardForm = () => {
-        const {deck, navigation} = this.props
-        navigation.navigate('NewCard', {deckId: deck.title})
-    }
-
-    goToQuizView = () => {
-        const {deck, navigation} = this.props
-        navigation.navigate('Quiz', {deckId: deck.title})
+    componentDidMount() {
+        const {navigation, saveRouteKey} = this.props
+        const deckDetailsRouteKey = navigation.state.key
+        saveRouteKey(deckDetailsRouteKey)
     }
 
     render () {
-        const {deck, navigation} = this.props
+        const {navigation} = this.props
         return (
             <View style={{flex: 1}}>
                 <QuestionTabs navigation={navigation}/>
@@ -69,26 +68,8 @@ class DeckDetails extends Component {
 const DeckDetailsConnected = connect((state, props) => {
     const {deckId} = props.navigation.state.params
     return{ deck: state.decks.byId[deckId] } 
-})(DeckDetails)
+}, ({saveRouteKey}))(DeckDetails)
 
 DeckDetailsConnected.router = QuestionTabs.router
 
 export default DeckDetailsConnected
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        padding: 20,
-        paddingBottom: 40
-    },
-    description: {
-        fontSize: 30,
-        textAlign: 'center'
-    },
-    cards: {
-        fontSize: 20,
-        opacity: 0.4,
-        textAlign: 'center'
-    }
-})

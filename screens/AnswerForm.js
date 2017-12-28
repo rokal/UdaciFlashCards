@@ -1,7 +1,8 @@
 import React from 'react'
-import {Text, View, TextInput, StyleSheet, Switch} from 'react-native'
-import CustomSwitch from './CustomSwitch'
+import {Text, View, TextInput, StyleSheet, Switch, ToastAndroid} from 'react-native'
 
+import CustomSwitch from './CustomSwitch'
+import {newAnswerValidation, validateEntity} from '../modules/commons/validate'
 import CustomButton from './CustomButton'
 import { light } from '../helpers/colors'
 
@@ -15,8 +16,14 @@ class AnswerForm extends React.Component{
     handleSave = () => {
         const {onSave} = this.props
         const {answer, isTruthy} = this.state
-        onSave({body: answer, isTruthy})
-        this.setState({formMode: false, answer: '', isTruthy: true})
+        const answerToSave = {body: answer, isTruthy}
+        const validationMessage = validateEntity(answerToSave, newAnswerValidation)
+        if(validationMessage) {
+            ToastAndroid.show(validationMessage, ToastAndroid.SHORT)
+        }else{
+            onSave(answerToSave)
+            this.setState({formMode: false, answer: '', isTruthy: true})
+        }
     }
     render() {
         const {formMode, answer, isTruthy} = this.state

@@ -1,9 +1,10 @@
 import React, {Component} from 'react'
-import {Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView} from 'react-native'
+import {Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, ToastAndroid} from 'react-native'
 import {connect} from 'react-redux'
 
 import { white, light } from '../helpers/colors'
 import {createDeck} from '../modules/decks/actions'
+import {newDeckValidation, validateEntity} from '../modules/commons/validate'
 
 class NewDeck extends Component {
     state = {value: ''}
@@ -14,15 +15,21 @@ class NewDeck extends Component {
 
     handleDeckCreation = () => {
         const {value} = this.state
-        const {dispatch, navigation} = this.props
-        dispatch(createDeck({title: value, questions: []}))
-        this.setState({value: ''})
-        navigation.navigate('Decks')
+        const {navigation, createDeck} = this.props
+        const newDeck = {title: value, questions: []}
+        const validationMessage = validateEntity(newDeck, newDeckValidation)
+        if(validationMessage) {
+            ToastAndroid.show(validationMessage, ToastAndroid.SHORT)
+        }else{
+            createDeck(newDeck, () => {
+                navigation.navigate('DeckDetails', {deckId: value})
+                this.setState({value: ''})
+            })
+        }
     }
 
     render() {
         const {value} = this.state
-        const disabled = value.length === 0
         return (
             <KeyboardAvoidingView style={styles.container} keyboardVerticalOffset={2} behavior='padding'>
                 <Text style={styles.title}>What is the title of your new deck ?</Text>
@@ -31,7 +38,7 @@ class NewDeck extends Component {
                     value={value}
                     placeholder='Deck title'
                 />
-                <TouchableOpacity style={{backgroundColor: light,  marginTop: 15 }} disabled={disabled} onPress={this.handleDeckCreation}>
+                <TouchableOpacity style={{backgroundColor: light,  marginTop: 15 }} onPress={this.handleDeckCreation}>
                     <Text style={styles.buttonText}>Submit</Text>
                 </TouchableOpacity>
             </KeyboardAvoidingView>
@@ -39,7 +46,7 @@ class NewDeck extends Component {
     }
 }
 
-export default connect()(NewDeck)
+export default connect(null, {createDeck})(NewDeck)
 
 const styles = StyleSheet.create({
     container: {
