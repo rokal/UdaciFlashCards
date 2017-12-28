@@ -20,7 +20,7 @@
     3. `yarn install`
     4. `yarn start`
 
-    You can then use expo app or android simulator to view the app by following the instuctions n your console
+    You can then use expo app or android simulator to view the app by following the instuctions on your console
 
     
     **HOW IT WORKS ?**
