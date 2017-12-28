@@ -15,7 +15,7 @@ class Questions extends Component {
     handleDeleteQuestion = (questionTitle) => {
         const {dispatch, deck} = this.props
         dispatch(deleteQuestion(deck.title, questionTitle, () => {
-            ToastAndroid.show(`"${questionTitle}" has been deleted`, ToastAndroid.SHORT);
+            ToastAndroid.show(`"${questionTitle}" has been deleted`, ToastAndroid.SHORT)
         }))
     }
     render() {

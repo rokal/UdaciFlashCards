@@ -1,6 +1,8 @@
 import React, {Component} from 'react'
-import {Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView} from 'react-native'
+import {Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, ToastAndroid} from 'react-native'
 import {connect} from 'react-redux'
+import { NavigationActions } from 'react-navigation'
+import {newQuestionValidation, validateEntity} from '../modules/commons/validate'
 
 import AnswerForm from './AnswerForm'
 import Answers from './Answers'
@@ -16,10 +18,20 @@ class NewQuestion extends Component {
 
     handleQuestionCreation = () => {
         const {question} = this.state
-        const {dispatch, navigation, deck} = this.props
-        dispatch(addQuestion(deck.title, question))
-        this.setState({question: {title: '', answers: []}})
-        navigation.navigate('Questions')
+        const {dispatch, navigation, deck, routeKey} = this.props
+        const validationMessage = validateEntity(question, newQuestionValidation)
+        if(validationMessage) {
+            ToastAndroid.show(validationMessage, ToastAndroid.SHORT)
+        }else{
+            dispatch(addQuestion(deck.title, question))
+            const setParamsAction = NavigationActions.setParams({
+                params: {cardsCount: deck.questions.length + 1},
+                key: routeKey
+            })
+            navigation.dispatch(setParamsAction)
+            this.setState({question: {title: '', answers: []}})
+            navigation.goBack()
+        }
     }
 
     handleAddAnswer = (answer) => {
@@ -36,7 +48,6 @@ class NewQuestion extends Component {
 
     render() {
         const {question} = this.state
-        const disabled = question.title.length === 0 || question.answers.length === 0
         const isAnswersSizeReached = question.answers.length === 4
         return (
             <KeyboardAvoidingView style={styles.container} keyboardVerticalOffset={2} behavior='padding'>
@@ -47,7 +58,7 @@ class NewQuestion extends Component {
                 />
                 <Answers answers={question.answers} />
                 <AnswerForm onSave={this.handleAddAnswer} disableNewEntry={isAnswersSizeReached}/>
-                <TouchableOpacity style={{backgroundColor: light,  marginTop: 15}} disabled={disabled} onPress={this.handleQuestionCreation}>
+                <TouchableOpacity style={{backgroundColor: light,  marginTop: 15}} onPress={this.handleQuestionCreation}>
                     <Text style={styles.buttonText}>Submit</Text>
                 </TouchableOpacity>
             </KeyboardAvoidingView>
@@ -57,8 +68,9 @@ class NewQuestion extends Component {
 
 export default connect((state, props) => {
     const {deckId} = props.navigation.state.params
-    deck = state.decks.byId[deckId]
-    return {deck}
+    const deck = state.decks.byId[deckId]
+    const routeKey = state.decks.routeKey
+    return {deck, routeKey}
 })(NewQuestion)
 
 const styles = StyleSheet.create({

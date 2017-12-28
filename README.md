@@ -7,9 +7,21 @@ This is the final project of the [Udacity Nano degree program on React](https://
     
 [Expo link to scan QR Code](https://expo.io/@rokal/flash-cards)
 
-    
 [APK available here](https://exp-shell-app-assets.s3-us-west-1.amazonaws.com/android%2F%40rokal%2Fflash-cards-9347447a-eb2a-11e7-afed-0a580a78280f-signed.apk) 
     
+
+**HOW TO LAUNCH THE APP**
+
+Follow the steps bellow to launch the application: 
+
+1. `git clone https://github.com/rokal/UdaciFlashCards.git`
+2. `cd UdaciFlashCards`
+3. `yarn install`
+4. `yarn start`
+
+You can then use expo app or android simulator to view the app by following the instuctions on your console
+
+
 **HOW IT WORKS ?**
     
  1. Create  a new deck
